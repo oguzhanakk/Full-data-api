@@ -4,6 +4,7 @@ import numpy as np
 # Currency datalarını kolayca çekebilmek için kullanılan API'ler
 import nasdaqdatalink
 import investpy
+from pandas_datareader import data as pdr
 
 # Scraping için kullanılan modüller.
 import requests
@@ -193,25 +194,16 @@ df = df.sort_index()
 # df.to_csv('data/weather.csv')
 """
 
-"""
-headers_param = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36"}
-"""
+today = dt.datetime.today().strftime("%d/%m/%Y")
 
-"""
-today = datetime.today().strftime('%d/%m/%Y')
-usdtrydf = investpy.currency_crosses.get_currency_cross_historical_data(currency_cross='USD/TRY', from_date='01/01/2019',as_json=False, order="ascending",
-                                                       to_date=f'05/12/2022',interval="Daily")
+usdtrydf = pdr.get_data_yahoo("USDTRY=X", start="2019-01-01", end=f"{today}")
+usdtrydf = usdtrydf[["Close"]].rename(columns={"Close": "USD_Close"})
 
-usdtrydf = usdtrydf[['Close']].rename(columns={'Close': 'USD_Close'})
-# usdtrydf.to_csv('data/usdtry.csv')
+eurtrydf = pdr.get_data_yahoo("EURTRY=X", start="2019-01-01", end=f"{today}")
+eurtrydf = eurtrydf[["Close"]].rename(columns={"Close": "EUR_Close"})
 
-today = datetime.today().strftime('%d/%m/%Y')
-eurtrydf = investpy.get_currency_cross_historical_data(currency_cross='EUR/TRY', from_date='01/01/2019',
-                                                       to_date=f'{today}', headers=headers_param)
-eurtrydf = eurtrydf[['Close']].rename(columns={'Close': 'EUR_Close'})
-eurtrydf.to_csv('data/eurtrydf.csv')
-"""
+#usdtrydf.to_csv("data/usdtry.csv")
+#eurtrydf.to_csv("data/eurtrydf.csv")
 
 
 alldf = pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(
