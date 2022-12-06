@@ -32,12 +32,15 @@ bigmacindex = bigmacindex.rename(columns={'Value': 'bigmac_index'})
 # bigmacindex.to_csv('data/bigmac.csv')
 """
 
+today = dt.datetime.today().strftime("%Y/%m/%d")
 usdtrydf = pdr.get_data_yahoo("USDTRY=X", start="2019-01-01", end=f"{today}")
 usdtrydf = usdtrydf[["Close"]].rename(columns={"Close": "USD_Close"})
+
 
 today2 = dt.datetime.today().strftime("%Y/%m/%d")
 brent_petrol = pdr.get_data_yahoo("BZ=F", start="2019-01-01", end=f"{today2}")
 brent_petrol = brent_petrol.iloc[:, 0:4]
+brent_petrol = brent_petrol.rename(columns = {'High' : 'B_petrol_max', 'Low' : 'B_petrol_min', 'Open' : 'B_petrol_open', 'Close' : 'B_petrol_close'})
 # brent_petrol.to_csv('data/brent_petrol.csv')
 
 url = 'https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Istatistikler/Enflasyon+Verileri/Tuketici+Fiyatlari'
