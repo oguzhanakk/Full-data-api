@@ -200,9 +200,9 @@ eurtrydf = eurtrydf[["Close"]].rename(columns={"Close": "EUR_Close"})
 #usdtrydf.to_csv("data/usdtry.csv")
 #eurtrydf.to_csv("data/eurtrydf.csv")
 
-"""
+
 alldf = pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(
-    pd.merge_asof(btcdf, tufedata.sort_index(), left_index=True, right_index=True, allow_exact_matches=False),
+    pd.merge_asof(btcdf, ufedata.sort_index(), left_index=True, right_index=True, allow_exact_matches=False),
     bigmacindex.sort_index(), left_index=True, right_index=True, allow_exact_matches=False),
     ufedata.sort_index(),
     left_index=True,
@@ -222,8 +222,8 @@ alldf = pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd
     usdtrydf.sort_index(), left_index=True, right_index=True,
     allow_exact_matches=False),
     eurtrydf.sort_index(), left_index=True, right_index=True, allow_exact_matches=False)
-"""
 
+alldf.to_excel('berk_demirkiran.xlsx')
 
 print("Success")
 
