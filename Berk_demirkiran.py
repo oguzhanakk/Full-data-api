@@ -154,7 +154,6 @@ dogalgaz_data = dogalgaz_data.drop(['Yıl', 'Ay_No'], axis=1).set_index('Tarih')
 
 # dogalgaz_data.to_csv('data/dogalgaz.csv')
 
-"""
 df = pd.DataFrame()
 enddate = datetime.today()
 startdate = 0
@@ -165,10 +164,10 @@ for j in range(1, 2):
     endst = enddate.strftime('%Y-%m-%d')
     for city in ['istanbul', 'izmir', 'ankara']:
         citydf = pd.DataFrame()
-        url = f'https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude={part}&appid={"735203eac3d456db9e712ddd752cb680"}'
+        url = f'https://api.worldweatheronline.com/premium/v1/past-weather.ashx?date={startst}&enddate={endst}&key=edf1f36bf930458abfa93227220612&q={city},turkey&format=json'
         r = requests.get(url, verify=False)
         jres = json.loads(r.text)
-
+        print(jres)
 try:
     for i in range(len(jres['data']['weather'])):
         my_dict = {
@@ -181,18 +180,14 @@ try:
     citydf = citydf.append(pd.DataFrame(my_dict, index=[i]))
 except:
     print("error")
-
 citydf1 = pd.concat([citydf1, citydf], axis=1)
 df = df.append(citydf1)
-
 enddate = enddate - pd.DateOffset(months=1)
-
 df = df.drop_duplicates()
-df = df.drop(['izmir_date', 'ankara_date'], axis=1).rename(columns={'istanbul_date': 'date'}).set_index('date')
+#df = df.drop(['izmir_date', 'ankara_date'], axis=1).rename(columns={'istanbul_date': 'date'}).set_index('date')
 df.index = pd.to_datetime(df.index)
 df = df.sort_index()
-# df.to_csv('data/weather.csv')
-"""
+df.to_csv('weather.csv')
 
 today = dt.datetime.today().strftime("%d/%m/%Y")
 
@@ -205,28 +200,30 @@ eurtrydf = eurtrydf[["Close"]].rename(columns={"Close": "EUR_Close"})
 #usdtrydf.to_csv("data/usdtry.csv")
 #eurtrydf.to_csv("data/eurtrydf.csv")
 
-
+"""
 alldf = pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(
     pd.merge_asof(btcdf, tufedata.sort_index(), left_index=True, right_index=True, allow_exact_matches=False),
     bigmacindex.sort_index(), left_index=True, right_index=True, allow_exact_matches=False),
-                                                                                                          ufedata.sort_index(),
-                                                                                                          left_index=True,
-                                                                                                          right_index=True,
-                                                                                                          allow_exact_matches=False),
-                                                                                            tgedf.sort_index(),
-                                                                                            left_index=True,
-                                                                                            right_index=True,
-                                                                                            allow_exact_matches=False),
-                                                                              kfedata.sort_index(), left_index=True,
-                                                                              right_index=True,
-                                                                              allow_exact_matches=False),
-                                                                stringencydf.sort_index(), left_index=True,
-                                                                right_index=True, allow_exact_matches=False),
-                                                  df.sort_index(), left_index=True, right_index=True,
-                                                  allow_exact_matches=False),
-                                    usdtrydf.sort_index(), left_index=True, right_index=True,
-                                    allow_exact_matches=False),
-                      eurtrydf.sort_index(), left_index=True, right_index=True, allow_exact_matches=False)
+    ufedata.sort_index(),
+    left_index=True,
+    right_index=True,
+    allow_exact_matches=False),
+    tgedf.sort_index(),
+    left_index=True,
+    right_index=True,
+    allow_exact_matches=False),
+    kfedata.sort_index(), left_index=True,
+    right_index=True,
+    allow_exact_matches=False),
+    stringencydf.sort_index(), left_index=True,
+    right_index=True, allow_exact_matches=False),
+    df.sort_index(), left_index=True, right_index=True,
+    allow_exact_matches=False),
+    usdtrydf.sort_index(), left_index=True, right_index=True,
+    allow_exact_matches=False),
+    eurtrydf.sort_index(), left_index=True, right_index=True, allow_exact_matches=False)
+"""
+
 
 print("Success")
 
