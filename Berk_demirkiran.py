@@ -25,24 +25,35 @@ btcdf = btcdf.loc['2019':]
 btcdf = btcdf.rename(columns={'Value': 'BTCUSDT'})
 # btcdf.to_csv('data/btcdata.csv')
 
+"""
 bigmacindex = nasdaqdatalink.get('ODA/TUR_PCPI', collapse='monthly')
 bigmacindex = bigmacindex.loc['2018':'2022']
 bigmacindex = bigmacindex.rename(columns={'Value': 'bigmac_index'})
 # bigmacindex.to_csv('data/bigmac.csv')
+"""
 
-url = 'https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Istatistikler/Enflasyon+Verileri/Uretici+Fiyatlari'
+usdtrydf = pdr.get_data_yahoo("USDTRY=X", start="2019-01-01", end=f"{today}")
+usdtrydf = usdtrydf[["Close"]].rename(columns={"Close": "USD_Close"})
+
+today2 = dt.datetime.today().strftime("%Y/%m/%d")
+brent_petrol = pdr.get_data_yahoo("BZ=F", start="2019-01-01", end=f"{today2}")
+brent_petrol = brent_petrol.iloc[:, 0:4]
+# brent_petrol.to_csv('data/brent_petrol.csv')
+
+url = 'https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Istatistikler/Enflasyon+Verileri/Tuketici+Fiyatlari'
 tufedata = pd.read_html(url)
 
 tufedata = tufedata[0].set_index('Unnamed: 0')
-tufedata = tufedata.drop('Yıllık Değişim.1', axis=1)
 tufedata.index = pd.to_datetime(tufedata.index)
+tufedata = tufedata.iloc[:,0:1]
+# tufedata.to_csv('data/tufe.csv')
 
 url = 'https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Istatistikler/Enflasyon+Verileri/Uretici+Fiyatlari'
 
 ufedata = pd.read_html(url, header=1)
 ufedata = ufedata[0].set_index('Unnamed: 0')
 ufedata.index = pd.to_datetime(ufedata.index)
-ufedata = ufedata.iloc[:, 3:4]
+ufedata = ufedata.iloc[:, 1:2]
 # ufedata.to_csv('data/ufe.csv')
 
 url = 'https://evds2.tcmb.gov.tr/EVDSServlet'
@@ -169,7 +180,7 @@ for j in range(1, 2):
         jres = json.loads(r.text)
         print(jres)
 try:
-    for i in range(len(jres['data']['weather'])):
+    for i in range(0,len(jres['data']['weather'])):
         my_dict = {
         f'{city}_date': jres['data']['weather'][i]['date'],
         f'{city}_maxtempC': jres['data']['weather'][i]['maxtempC'],
@@ -201,13 +212,10 @@ eurtrydf = eurtrydf[["Close"]].rename(columns={"Close": "EUR_Close"})
 #eurtrydf.to_csv("data/eurtrydf.csv")
 
 
-alldf = pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(
-    pd.merge_asof(btcdf, ufedata.sort_index(), left_index=True, right_index=True, allow_exact_matches=False),
-    bigmacindex.sort_index(), left_index=True, right_index=True, allow_exact_matches=False),
-    ufedata.sort_index(),
-    left_index=True,
-    right_index=True,
-    allow_exact_matches=False),
+alldf = pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(
+    pd.merge_asof(pd.merge_asof(btcdf, ufedata.sort_index(), left_index=True, right_index=True, allow_exact_matches=False),
+    tufedata.sort_index(), left_index=True, right_index=True, allow_exact_matches=False),
+    brent_petrol.sort_index(), left_index=True, right_index=True, allow_exact_matches=False),
     tgedf.sort_index(),
     left_index=True,
     right_index=True,
@@ -223,7 +231,7 @@ alldf = pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd
     allow_exact_matches=False),
     eurtrydf.sort_index(), left_index=True, right_index=True, allow_exact_matches=False)
 
-alldf.to_excel('berk_demirkiran.xlsx')
+alldf.to_excel('berk_demirkiran2.xlsx')
 
 print("Success")
 
