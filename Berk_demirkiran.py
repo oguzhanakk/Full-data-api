@@ -18,6 +18,7 @@ import time
 # Datalari database'e yüklemek için kullanacagimiz kütüphane.
 import sqlalchemy as db
 
+
 #api_key="rvBysw1xnVJHM-8-2hb4" #my special api key Oguzhan Akkoyunlu
 
 btcdf = nasdaqdatalink.get('BCHAIN/MKPRU', collapse='daily',api_key = "rvBysw1xnVJHM-8-2hb4")
@@ -125,8 +126,6 @@ headers = {
 data1 = 'orderby=Tarih+desc&thousand=1&decimal=1&frequency=MONTH&aggregationType=last%23last%23last&formula=0%231%233&graphicType=0&skip=0&take=20&sort=Tarih%23true&select=TP_HKFE01-0%23TP_HKFE01-1%23TP_HKFE01-3&startDate=01-01-2010&endDate=01-03-2022&obsCountEnabled=false&obsCount=&categories=5949&mongoAdresses=evds&userId=&datagroupString=bie_hkfe&dateFormatValue=yyyy-ww&customFormula=null&excludedSeries=null'
 data2 = 'orderby=Tarih+desc&thousand=1&decimal=1&frequency=MONTH&aggregationType=last%23last%23last&formula=0%231%233&graphicType=0&skip=20&take=20&sort=Tarih%23true&select=TP_HKFE01-0%23TP_HKFE01-1%23TP_HKFE01-3&startDate=01-01-2010&endDate=01-03-2022&obsCountEnabled=false&obsCount=&categories=5949&mongoAdresses=evds&userId=&datagroupString=bie_hkfe&dateFormatValue=yyyy-ww&customFormula=null&excludedSeries=null'
 
-
-
 kfedf = pd.DataFrame()
 for data in [data1, data2]:
     r = requests.post(url, headers=headers, data=data,  verify=False)
@@ -200,7 +199,26 @@ alldf = pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd
     allow_exact_matches=False),
     eurtrydf.sort_index(), left_index=True, right_index=True, allow_exact_matches=False)
 
-alldf.to_excel('berk_demirkiran2.xlsx')
+"""
+a = 0
+for j in range(0,len(alldf.columns)):
+    for i in range(0,len(alldf[alldf.columns[j]])):
+        if np.isnan(alldf[alldf.columns[j]][i]):
+            alldf[alldf.columns[j]][i] = 5
+"""
+
+alldf.fillna(5, inplace=True) #simdilik
+
+#date i alabilmek icin
+alldf.to_excel("berk_demirkiran2.xlsx")
+df = pd.read_excel("berk_demirkiran2.xlsx")
+
+#alldf'i ayliga cevirme
+df['Date'] = pd.to_datetime(df['Date'])
+df.set_index('Date', inplace=True)
+df = df.resample('m').mean()
+
+df.to_excel("berk_demirkiran3.xlsx")
 
 print("Success")
 
