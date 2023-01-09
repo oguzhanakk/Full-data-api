@@ -1,0 +1,12 @@
+pandas
+numpy
+nasdaqdatalink
+investpy
+pandas_datareader
+http.client
+requests
+json
+datetime
+time
+sqlalchemy
+warnings
