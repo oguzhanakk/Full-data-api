@@ -1,8 +1,8 @@
 pandas
 numpy
-nasdaqdatalink
+nasdaq-data-link
 investpy
-pandas_datareader
+pandas-datareader
 http.client
 requests
 json
