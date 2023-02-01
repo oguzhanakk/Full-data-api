@@ -1,11 +1,7 @@
 pandas
 numpy
 nasdaq-data-link
-<<<<<<< HEAD
-yfinance
-=======
 investpy
->>>>>>> 5e46f9746c1f9837b257f2605c392c9f75a4f53d
 pandas-datareader
 http.client
 requests
