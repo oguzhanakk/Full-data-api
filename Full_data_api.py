@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 
 # Currency datalarını kolayca çekebilmek için kullanılan API'ler
+import yfinance as yf
+import yfinance as yfin
 import nasdaqdatalink
-import investpy
 from pandas_datareader import data as pdr
 import http.client
 
@@ -23,7 +24,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-#api_key="rvBysw1xnVJHM-8-2hb4" #my special api key Oguzhan Akkoyunlu
+#api_key="rvBysw1xnVJHM-8-2hb4" #My special api key Oguzhan Akkoyunlu
 #Bitcoin api
 btcdf = nasdaqdatalink.get('BCHAIN/MKPRU', collapse='daily',api_key = "rvBysw1xnVJHM-8-2hb4")
 btcdf = btcdf.loc['2019':]
@@ -37,13 +38,23 @@ bigmacindex = bigmacindex.loc['2018':'2022']
 bigmacindex = bigmacindex.rename(columns={'Value': 'bigmac_index'})
 # bigmacindex.to_csv('data/bigmac.csv')
 """
-#Usd-try api data
-today = dt.datetime.today().strftime("%Y/%m/%d")
+
+#Usd-try euro-try api data
+yfin.pdr_override()
+today = datetime.today().strftime("%Y-%m-%d")
 usdtrydf = pdr.get_data_yahoo("USDTRY=X", start="2019-01-01", end=f"{today}")
-usdtrydf = usdtrydf[["Close"]].rename(columns={"Close": "USD_Close"})
+usdtrydf = usdtrydf[["Open"]].rename(columns={"Open": "USD_Open"})
+
+yfin.pdr_override()
+today = datetime.today().strftime("%Y-%m-%d")
+eurtrydf = pdr.get_data_yahoo("EURTRY=X", start="2019-01-01", end=f"{today}")
+eurtrydf = eurtrydf[["Open"]].rename(columns={"Open": "EUR_Open"})
+#usdtrydf.to_excel('usdttry.xlsx')
+#eurtrydf.to_excel('eurtrydf.xlsx')
 
 #Brent petrol api data
-today2 = dt.datetime.today().strftime("%Y/%m/%d")
+yfin.pdr_override()
+today2 = datetime.today().strftime("%Y-%m-%d")
 brent_petrol = pdr.get_data_yahoo("BZ=F", start="2019-01-01", end=f"{today2}")
 brent_petrol = brent_petrol.iloc[:, 0:4]
 brent_petrol = brent_petrol.rename(columns = {'High' : 'B_petrol_max', 'Low' : 'B_petrol_min', 'Open' : 'B_petrol_open', 'Close' : 'B_petrol_close'})
@@ -161,7 +172,8 @@ dogalgaz_data = dogalgaz_data.drop(['Yıl', 'Ay_No'], axis=1).set_index('Tarih')
 # dogalgaz_data.to_csv('data/dogalgaz.csv')
 
 #Weather old data
-weather_df = pd.read_excel("weather_son.xlsx")
+weather_df = pd.read_excel("weather_data.xlsx")
+'''
 #Weather new data
 conn = http.client.HTTPSConnection("api.collectapi.com")
 headers = {
@@ -186,19 +198,7 @@ for city in ['ankara', 'istanbul', 'izmir']:
 date1 = pd.to_datetime(date, format="%d.%m.%Y")
 list = [date1,int(float(max[0])),int(float(min[0])),int(float(degree[0])),0,int(float(max[1])),int(float(min[1])),int(float(degree[1])),0,int(float(max[2])),int(float(min[2])),int(float(degree[2])),0]
 weather_df = weather_df.append(pd.Series(list, index=weather_df.columns), ignore_index=True)
-
-
-
-#Usd-try euro-try api data
-today = dt.datetime.today().strftime("%d/%m/%Y")
-usdtrydf = pdr.get_data_yahoo("USDTRY=X", start="2019-01-01", end=f"{today}")
-usdtrydf = usdtrydf[["Close"]].rename(columns={"Close": "USD_Close"})
-
-eurtrydf = pdr.get_data_yahoo("EURTRY=X", start="2019-01-01", end=f"{today}")
-eurtrydf = eurtrydf[["Close"]].rename(columns={"Close": "EUR_Close"})
-
-#usdtrydf.to_csv("data/usdtry.csv")
-#eurtrydf.to_csv("data/eurtrydf.csv")
+'''
 
 #Combine all data in one dataframe
 alldf = pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(pd.merge_asof(
@@ -228,37 +228,21 @@ for j in range(0,len(alldf.columns)):
 """
 
 #To put missing value data
+#petrol_start_variable
 list = [55.8,56.1,55.53,55.72,51.83,51.92,53.90,54.12,54.38,54.60]
 x=0
 for i in range(3,8):
     for j in range(0,2):
         alldf[alldf.columns[i]][j] = list[x]
         x+=1
-alldf[alldf.columns[21]][0] = 5.26
-alldf[alldf.columns[22]][0] = 6.02
+        
+#usd-eur start variable
+alldf[alldf.columns[18]][0] = 5.26
+alldf[alldf.columns[19]][0] = 6.02
 
-alldf[alldf.columns[13]][1435] = 13
-alldf[alldf.columns[14]][1435] = 10
-alldf[alldf.columns[15]][1435] = 12
-alldf[alldf.columns[16]][1435] = 0
+alldf = alldf.resample('m').mean()
 
-list2 = [11,10,5,4,8,9,0,0,12,13,10,11,11,10,0,0,15,16,8,7,13,12,0,0]
-y=0
-for i in range(9,21):
-    for j in range(1436,1438):
-        alldf[alldf.columns[i]][j] = list2[y]
-        y+=1
-
-#To get old weather data
-alldf.to_excel("Genel_data_gunluk.xlsx") #for everyday...
-
-#Convert alldf to monthly data
-df = pd.read_excel("Genel_data_gunluk.xlsx")
-df['Date'] = pd.to_datetime(df['Date'])
-df.set_index('Date', inplace=True)
-df = df.resample('m').mean()
-
-df.to_excel("Genel_data_aylik.xlsx") #For everymonth
+alldf.to_excel("Monthly_General_data.xlsx") #For everymonth
 
 print("Success") #Success message (If this returned, the code worked.)
 
