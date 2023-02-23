@@ -1,10 +1,15 @@
 import requests
 import datetime
 import pandas as pd
-import json
+import csv, os, json
+from dotenv import load_dotenv
+print('Packages are imported')
 
+load_dotenv()
+
+API_KEY_2 = os.environ.get("API_KEY")
 # API key
-api_key = "3d191b0c3d2e41388b873642230102"
+api_key = API_KEY_2
 
 # City codes for Istanbul, Izmir and Ankara
 city_codes = ["İstanbul", "Ankara", "İzmir"]

@@ -5,17 +5,11 @@ The project where all the data specific to groupm company are taken with differe
 To run this project, you will need to have the following software requirements:
 
 • pandas
-• numpy
-• nasdaqdatalink
-• investpy
-• pandas_datareader
-• http.client
-• requests
-• json
-• datetime
-• time
-• sqlalchemy
-• warning
+• Nasdaq-Data-Link
+• pandas-datareader
+• python-dotenv
+• yfinance
+• psycopg2
 
 # Setup
 To run this project on your own computer, follow these steps:

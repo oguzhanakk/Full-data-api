@@ -10,7 +10,7 @@ import http.client
 
 # Scraping için kullanılan modüller.
 import requests
-import json
+import csv, os, json
 
 # Scraping, data düzenleme vb konular için ihtiyacımız olan modüller.
 from datetime import datetime
@@ -18,15 +18,29 @@ import datetime as dt
 import time
 
 # Datalari database'e yüklemek için kullanacagimiz kütüphane.
-import sqlalchemy as db
+import psycopg2
 
 import warnings
+from dotenv import load_dotenv
+print('Packages are imported')
+
+load_dotenv()
+HOST = os.environ.get("DB_HOST")
+DATABASE = os.environ.get("DB_DATABASE")
+USER = os.environ.get("DB_USER")
+PASSWORD = os.environ.get("DB_PASSWORD")
+PORT = os.environ.get("DB_PORT")
+SCHEMA = os.environ.get("DB_SCHEMA")
+TABLE = os.environ.get("DB_TABLE")
+API_KEY = os.environ.get("API_KEY")
+
+print('Environment variables are imported')
 
 warnings.filterwarnings("ignore")
 
 #api_key="rvBysw1xnVJHM-8-2hb4" #My special api key Oguzhan Akkoyunlu
 #Bitcoin api
-btcdf = nasdaqdatalink.get('BCHAIN/MKPRU', collapse='daily',api_key = "rvBysw1xnVJHM-8-2hb4")
+btcdf = nasdaqdatalink.get('BCHAIN/MKPRU', collapse='daily',api_key = API_KEY)
 btcdf = btcdf.loc['2019':]
 btcdf = btcdf.rename(columns={'Value': 'BTCUSDT'})
 # btcdf.to_csv('data/btcdata.csv')
@@ -241,17 +255,52 @@ alldf[alldf.columns[18]][0] = 5.26
 alldf[alldf.columns[19]][0] = 6.02
 
 alldf = alldf.resample('m').mean()
+#print(alldf)
 
-alldf.to_excel("Monthly_General_data.xlsx") #For everymonth
+#alldf.to_excel("Monthly_General_data.xlsx") #For everymonth
 
 print("Success") #Success message (If this returned, the code worked.)
 
+def postgre_insert(all_data):
+        
+        conn = None
+        # Connect to the database
+        print("before connection")
+        conn = psycopg2.connect(host=HOST, database=DATABASE, user=USER, password=PASSWORD, port=PORT)
+        print("after connection")
+        print("connection is created")
 
-# def insert_db(data:pd.DataFrame, table_name:str, schema_name:str, if_exists:str='append'):
-#     username = 'hakan_ergun'
-#     password = 'grmDASAnalytics2022'
-#     host = 'grmtr-das-pgs.cryxxorv0vci.eu-west-1.rds.amazonaws.com'
-#     port = '5457'
+        # Create a cursor object
+        cur = conn.cursor()
+        print("cursor is created")
+        
+        print('all_data:')
+        print(all_data)
 
-#     engine = db.create_engine(f'postgresql+psycopg2://{username}:{password}@{host}:{port}/scraping')
-#     data.to_sql(table_name, engine, schema=schema_name,if_exists=if_exists,index=False)
+        # Create schema if not exists
+        cur.execute(f'''CREATE SCHEMA IF NOT EXISTS {SCHEMA}''')
+        
+        # Create table
+        cur.execute(f'''CREATE TABLE IF NOT EXISTS {SCHEMA}.{TABLE}
+                        (id SERIAL PRIMARY KEY, BTCUSDT numeric, YI_UFE numeric, TUFE_Yillik numeric, 
+                        B_petrol_open numeric, B_petrol_max numeric, B_petrol_min numeric, B_petrol_close numeric,
+                        Tuketici_Guven_Endeksi numeric, Konut_Fiyat_Endeksi numeric, B_wea_ank_max numeric, B_wea_ank_min numeric, 
+                        B_wea_ank_mean numeric, B_wea_ist_max numeric, B_wea_ist_min numeric,B_wea_ist_mean numeric, 
+                        B_wea_izm_max numeric, B_wea_izm_min numeric, B_wea_izm_mean numeric,USD_Open numeric, 
+                        EUR_Open numeric,Date text)''')
+
+        # Add trends to db
+        for i, row in all_data.iterrows():
+            cur.execute(f"INSERT INTO {SCHEMA}.{TABLE} (BTCUSDT, YI_UFE, TUFE_Yillik, B_petrol_open, B_petrol_max, B_petrol_min, B_petrol_close, Tuketici_Guven_Endeksi, Konut_Fiyat_Endeksi, B_wea_ank_max, B_wea_ank_min, B_wea_ank_mean, B_wea_ist_max, B_wea_ist_min, B_wea_ist_mean, B_wea_izm_max, B_wea_izm_min, B_wea_izm_mean, USD_Open, EUR_Open, Date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (row['BTCUSDT'], row['YI_UFE'], row['TUFE_Yillik'], row['B_petrol_open'], row['B_petrol_max'], row['B_petrol_min'], row['B_petrol_close'], row['Tuketici_Guven_Endeksi'], row['Konut_Fiyat_Endeksi'], row['B_wea_ank_max'], row['B_wea_ank_min'], row['B_wea_ank_mean'], row['B_wea_ist_max'], row['B_wea_ist_min'], row['B_wea_ist_mean'], row['B_wea_izm_max'], row['B_wea_izm_min'], row['B_wea_izm_mean'], row['USD_Open'], row['EUR_Open'], row['Date'])) 
+
+
+        # Commit the changes to the database
+        conn.commit()
+        print("changes are commited")
+
+        # Close the cursor and connection
+        cur.close()
+        conn.close()
+        print("cursor and connection are closed")
+    
+postgre_insert(alldf)
